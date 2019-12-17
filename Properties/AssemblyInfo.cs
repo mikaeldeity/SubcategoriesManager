@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Subcategories Manager")]
-[assembly: AssemblyDescription("Replace Subcategories in the active Document")]
+[assembly: AssemblyTitle("Subcategories Merger")]
+[assembly: AssemblyDescription("Replace and merge Subcategories in the active Document")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Subcategories Manager")]
+[assembly: AssemblyProduct("Subcategories Merger")]
 [assembly: AssemblyCopyright("Copyright © 2019 Mikael Santrolli ")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

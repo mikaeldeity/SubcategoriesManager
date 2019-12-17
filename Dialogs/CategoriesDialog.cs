@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SubcategoriesManager.Dialogs
+namespace SubcategoriesMerger.Dialogs
 {
     public partial class CategoriesDialog : System.Windows.Forms.Form
     {

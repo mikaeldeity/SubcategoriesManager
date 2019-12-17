@@ -1,4 +1,4 @@
-﻿namespace SubcategoriesManager.Dialogs
+﻿namespace SubcategoriesMerger.Dialogs
 {
     partial class CategoriesDialog
     {
