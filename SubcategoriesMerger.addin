@@ -2,7 +2,7 @@
 <RevitAddIns>
   <AddIn Type="Application">
     <Name>Subcategories Merger</Name>
-    <Assembly>.\SubcategoriesMerger\SubcategoriesMerger.dll</Assembly>
+    <Assembly>.\SubcategoriesMerger.dll</Assembly>
     <AddInId>bf86b382-e186-4e3d-86c2-12d679a80133</AddInId>
     <FullClassName>SubcategoriesMerger.App</FullClassName>
     <VendorId>Subcategories Merger</VendorId>

@@ -114,10 +114,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SubcategoriesMerger.addin" />
+    <None Include="SubcategoriesMerger.addin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\SubcategoriesManager.png" />
+    <Resource Include="Resources\SubcategoriesManager.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
