@@ -11,11 +11,18 @@ namespace SubcategoriesMerger
         {
             RibbonPanel ribbonPanel = application.CreateRibbonPanel("Subcategories");
             string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
-            PushButtonData b4Data = new PushButtonData("Manage", "Manage", thisAssemblyPath, "SubcategoriesMerger.Merge");
-            PushButton pb4 = ribbonPanel.AddItem(b4Data) as PushButton;
-            pb4.ToolTip = "Merge or replace Subcategories in the Project.";
-            BitmapImage pb4Image = new BitmapImage(new Uri("pack://application:,,,/SubcategoriesMerger;component/Resources/SubcategoriesManager.png"));
-            pb4.LargeImage = pb4Image;
+
+            PushButtonData b1Data = new PushButtonData("Manage", "Manage", thisAssemblyPath, "SubcategoriesMerger.Merge");
+            PushButton pb1 = ribbonPanel.AddItem(b1Data) as PushButton;
+            pb1.ToolTip = "Merge or replace Subcategories in the Project.";
+            BitmapImage pb1Image = new BitmapImage(new Uri("pack://application:,,,/SubcategoriesMerger;component/Resources/SubcategoriesManager.png"));
+            pb1.LargeImage = pb1Image;
+
+            PushButtonData b2Data = new PushButtonData("Unused", "Unused", thisAssemblyPath, "SubcategoriesMerger.Purge");
+            PushButton pb2 = ribbonPanel.AddItem(b2Data) as PushButton;
+            pb2.ToolTip = "Unused Subcategories in the Project.";
+            BitmapImage pb2Image = new BitmapImage(new Uri("pack://application:,,,/SubcategoriesMerger;component/Resources/SubcategoriesManager.png"));
+            pb2.LargeImage = pb2Image;
         }
 
         public Result OnShutdown(UIControlledApplication application)

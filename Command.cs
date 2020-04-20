@@ -3,8 +3,6 @@ using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SubcategoriesMerger
@@ -24,6 +22,8 @@ namespace SubcategoriesMerger
         internal static Category newsubcategory = null;
 
         internal static bool delete = false;
+
+        internal static bool groups = false;
 
         internal static List<GraphicsStyle> oldstyles = new List<GraphicsStyle>();
 
@@ -57,6 +57,8 @@ namespace SubcategoriesMerger
             oldsubcategories = new List<Category>();
 
             newsubcategory = null;
+
+            groups = false;
 
             foreach (Category category in categories)
             {
@@ -113,31 +115,45 @@ namespace SubcategoriesMerger
 
                 if (delete)
                 {
-                    Transaction t1 = new Transaction(doc, "Delete Subcategories");
-
-                    t1.Start();
-
-                    foreach (Category c in oldsubcategories)
+                    if (groups)
                     {
-                        if(c.Name != newsubcategory.Name)
-                        {
-                            try
-                            {
-                                doc.Delete(c.Id);
-                            }
-                            catch { systemcategories++; }
-                        }                        
+                        TaskDialog.Show("Warning", "Some Lines or Regions where inside groups and could not be modified.\nDelete will be skipped to avoid mistakes.\nManually check the groups and try again.");
                     }
+                    else
+                    {
+                        Transaction t1 = new Transaction(doc, "Delete Subcategories");
 
-                    t1.Commit();
+                        t1.Start();
+
+                        foreach (Category c in oldsubcategories)
+                        {
+                            if (c.Name != newsubcategory.Name)
+                            {
+                                try
+                                {
+                                    doc.Delete(c.Id);
+                                }
+                                catch { systemcategories++; }
+                            }
+                        }
+
+                        t1.Commit();
+
+                        if (systemcategories > 0)
+                        {
+                            TaskDialog.Show("Warning", "System Subcategories cannot be deleted.");
+                        }
+                    }
                 }
-
-                tg.Assimilate();
-
-                if (systemcategories > 0)
+                else
                 {
-                    TaskDialog.Show("Warning", "System Subcategories cannot be deleted.");
+                    if (groups)
+                    {
+                        TaskDialog.Show("Warning", "Some Lines or Regions where inside groups and could not be modified.");
+                    }
                 }
+
+                tg.Assimilate();                
 
                 return Result.Succeeded;
             }
@@ -162,8 +178,6 @@ namespace SubcategoriesMerger
 
             t1.Start();
 
-            List<GroupType> grouptypes = new List<GroupType>();            
-
             foreach (Category oldcat in oldcats)
             {
                 foreach (CurveElement c in curves)
@@ -178,12 +192,7 @@ namespace SubcategoriesMerger
                     {
                         if (c.GroupId.IntegerValue != -1)
                         {
-                            Group grp = doc.GetElement(c.GroupId) as Group;
-
-                            if (!grouptypes.Contains(grp.GroupType))
-                            {
-                                grouptypes.Add(grp.GroupType);
-                            }
+                            groups = true;
                             continue;
                         }
 
@@ -203,89 +212,13 @@ namespace SubcategoriesMerger
             {
                 if(r.GroupId.IntegerValue != -1)
                 {
+                    groups = true;
                     continue;
                 }
 
                 ElementTransformUtils.MoveElement(doc, r.Id, XYZ.BasisX);
                 ElementTransformUtils.MoveElement(doc, r.Id, XYZ.BasisX.Negate());
             }
-
-            Dictionary<GroupType, GroupType> swap = new Dictionary<GroupType, GroupType>();
-
-            foreach (GroupType g in grouptypes)
-            {
-                GroupSet groups = g.Groups;
-
-                if (groups.IsEmpty)
-                {
-                    continue;
-                }
-
-                var enumerator = groups.GetEnumerator();
-                enumerator.MoveNext();
-                Group group = enumerator.Current as Group;
-
-                Group defaultgroup = doc.Create.PlaceGroup(new XYZ(0, 0, 0), g);
-
-                ICollection<ElementId> groupelements = defaultgroup.UngroupMembers();
-
-                foreach (ElementId id in groupelements)
-                {
-                    if (doc.GetElement(id) is CurveElement)
-                    {
-                        foreach (Category oldcat in oldcats)
-                        {
-                            CurveElement c = doc.GetElement(id) as CurveElement;
-
-                            GraphicsStyle ln = c.LineStyle as GraphicsStyle;
-
-                            if (ln == null | forbidden.Contains(ln.GraphicsStyleCategory.Name))
-                            {
-                                continue;
-                            }
-                            if (ln.GraphicsStyleCategory.Name == oldcat.Name)
-                            {
-                                if (ln.GraphicsStyleType == GraphicsStyleType.Projection)
-                                {
-                                    c.LineStyle = newcat.GetGraphicsStyle(GraphicsStyleType.Projection);
-                                }
-                                else
-                                {
-                                    c.LineStyle = newcat.GetGraphicsStyle(GraphicsStyleType.Cut);
-                                }
-                            }
-                        }                        
-                    }
-                }
-
-                Group newgrp = doc.Create.NewGroup(groupelements);                
-
-                foreach (Group grp in groups)
-                {
-                    grp.GroupType = newgrp.GroupType;
-                }               
-
-                swap.Add(g, newgrp.GroupType);
-
-                doc.Delete(newgrp.Id);
-
-                doc.Delete(defaultgroup.Id);
-            }
-
-            foreach(GroupType gt in swap.Keys)
-            {
-                string name = gt.Name;
-
-                try
-                {
-                    doc.Delete(gt.Id);
-                }
-                catch { }               
-
-                swap[gt].Name = name;
-            }
-
-            t1.Commit();
         }
         private void ReplaceFamilySubCategories(Document doc, IList<Element> allfamilies, string category, List<Category> oldcats, Category newcat)
         {
@@ -301,7 +234,7 @@ namespace SubcategoriesMerger
                     continue;
                 }
 
-                if (!family.IsEditable | family.FamilyCategory == null)
+                if (!family.IsEditable | family.FamilyCategory == null | family.IsInPlace)
                 {
                     continue;
                 }
@@ -414,6 +347,106 @@ namespace SubcategoriesMerger
             }
 
             t1.Commit();
+        }
+    }
+    [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
+    [Autodesk.Revit.Attributes.Regeneration(Autodesk.Revit.Attributes.RegenerationOption.Manual)]
+    class Purge : IExternalCommand
+    {
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            UIApplication uiapp = commandData.Application;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            Document doc = uidoc.Document;
+
+            if (doc.IsFamilyDocument)
+            {
+                TaskDialog.Show("Error", "Subcategories Manager requires an open Project Document.");
+
+                return Result.Cancelled;
+            }
+
+            List<ElementId> categories = new List<ElementId>();
+
+            foreach (Category category in doc.Settings.Categories)
+            {
+                if (category.CanAddSubcategory && category.CategoryType != CategoryType.Internal)
+                {
+                    CategoryNameMap subcats = category.SubCategories;
+
+                    foreach(Category subcat in subcats)
+                    {
+                        categories.Add(subcat.Id);                        
+                    }
+                }
+            }
+
+            List<ElementId> familycategories = new List<ElementId>();
+
+            TransactionGroup tg = new TransactionGroup(doc, "Merge SubCategories");            
+
+            try
+            {
+                IList<Element> families = new FilteredElementCollector(doc).OfClass(typeof(Family)).ToElements();
+
+                familycategories = GetFamilySubcategories(doc, families, familycategories);
+
+                List<ElementId> unusedcat = new List<ElementId>();
+
+                foreach(ElementId cid in categories)
+                {
+                    if (!familycategories.Contains(cid))
+                    {
+                        unusedcat.Add(cid);
+                    }
+                }
+
+                var unuseddialog = new UnusedCatsDialog();
+
+                unuseddialog.UnusedTreeView.Nodes;
+
+                return Result.Succeeded;
+            }
+            catch (Exception e)
+            {
+                //tg.RollBack();
+
+                TaskDialog.Show("Error", e.Message);
+
+                return Result.Failed;
+            }
+        }        
+        private List<ElementId> GetFamilySubcategories(Document doc, IList<Element> allfamilies, List<ElementId> categories)
+        {
+            if (allfamilies.Count == 0) { return null; }
+
+            foreach (Family family in allfamilies)
+            {
+                if (!family.IsValidObject) { continue; }
+
+                if (!family.IsEditable | family.FamilyCategory == null | family.IsInPlace) { continue;}
+                
+                Document famdoc = doc.EditFamily(family);
+
+                Category cat = famdoc.OwnerFamily.FamilyCategory;
+
+                CategoryNameMap collcat = cat.SubCategories;
+
+                foreach (Category c in collcat)
+                {
+                    if (!categories.Contains(c.Id))
+                    {
+                        categories.Add(c.Id);
+                    }
+                }
+
+                //IList<Element> allnestedfamilies = new FilteredElementCollector(famdoc).OfClass(typeof(Family)).ToElements();
+
+                //categories = GetFamilySubcategories(famdoc, allnestedfamilies,categories);
+
+                famdoc.Close(false);
+            }
+            return categories;
         }
     }
     class FamilyOptions : IFamilyLoadOptions
