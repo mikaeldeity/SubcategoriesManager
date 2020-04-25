@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Subcategories Merger")]
-[assembly: AssemblyCopyright("Copyright © 2019 Mikael Santrolli ")]
+[assembly: AssemblyCopyright("Copyright © 2020 Mikael Santrolli")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

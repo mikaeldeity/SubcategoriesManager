@@ -77,5 +77,10 @@ namespace SubcategoriesMerger.Dialogs
                 Close();
             }            
         }
+
+        private void CategoriesDialog_HelpButtonClicked(object sender, CancelEventArgs e)
+        {
+            MessageBox.Show("Subcategories Manager", "Developed by Mikael Santrolli\n\nmikael.santrolli@gmail.com");
+        }
     }
 }

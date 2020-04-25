@@ -366,24 +366,26 @@ namespace SubcategoriesMerger
                 return Result.Cancelled;
             }
 
-            List<ElementId> categories = new List<ElementId>();
+            List<Category> subcategories = new List<Category>();
+
+            List<string> categories = new List<string>();
 
             foreach (Category category in doc.Settings.Categories)
             {
                 if (category.CanAddSubcategory && category.CategoryType != CategoryType.Internal)
                 {
+                    categories.Add(category.Name);
+
                     CategoryNameMap subcats = category.SubCategories;
 
                     foreach(Category subcat in subcats)
                     {
-                        categories.Add(subcat.Id);                        
+                        subcategories.Add(subcat);                        
                     }
                 }
             }
 
-            List<ElementId> familycategories = new List<ElementId>();
-
-            TransactionGroup tg = new TransactionGroup(doc, "Merge SubCategories");            
+            List<Category> familycategories = new List<Category>();
 
             try
             {
@@ -391,32 +393,57 @@ namespace SubcategoriesMerger
 
                 familycategories = GetFamilySubcategories(doc, families, familycategories);
 
-                List<ElementId> unusedcat = new List<ElementId>();
+                List<Category> unusedcat = new List<Category>();
 
-                foreach(ElementId cid in categories)
+                foreach(Category cid in subcategories)
                 {
                     if (!familycategories.Contains(cid))
-                    {
+                    {                        
                         unusedcat.Add(cid);
                     }
-                }
+                }                
 
                 var unuseddialog = new UnusedCatsDialog();
 
-                unuseddialog.UnusedTreeView.Nodes;
+                List<string> parents = new List<string>();
+
+                foreach (Category subid in unusedcat)
+                {
+                    parents.Add(subid.Parent.Name);
+                }
+
+                parents = parents.Distinct().ToList();
+
+                parents.Sort();
+
+                foreach(string parent in parents)
+                {
+                    unuseddialog.UnusedTreeView.Nodes.Add(new TreeNode(parent));
+                }
+
+                foreach (Category subid in unusedcat)
+                {
+                    foreach (TreeNode node in unuseddialog.UnusedTreeView.Nodes)
+                    {
+                        if(node.Text == subid.Parent.Name)
+                        {
+                            node.Nodes.Add(subid.Name);
+                        }
+                    }
+                }
+
+                unuseddialog.ShowDialog();
 
                 return Result.Succeeded;
             }
             catch (Exception e)
             {
-                //tg.RollBack();
-
                 TaskDialog.Show("Error", e.Message);
 
                 return Result.Failed;
             }
         }        
-        private List<ElementId> GetFamilySubcategories(Document doc, IList<Element> allfamilies, List<ElementId> categories)
+        private List<Category> GetFamilySubcategories(Document doc, IList<Element> allfamilies, List<Category> categories)
         {
             if (allfamilies.Count == 0) { return null; }
 
@@ -434,9 +461,9 @@ namespace SubcategoriesMerger
 
                 foreach (Category c in collcat)
                 {
-                    if (!categories.Contains(c.Id))
+                    if (!categories.Contains(c))
                     {
-                        categories.Add(c.Id);
+                        categories.Add(c);
                     }
                 }
 
