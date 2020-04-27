@@ -18,11 +18,11 @@ namespace SubcategoriesMerger
             BitmapImage pb1Image = new BitmapImage(new Uri("pack://application:,,,/SubcategoriesMerger;component/Resources/SubcategoriesManager.png"));
             pb1.LargeImage = pb1Image;
 
-            PushButtonData b2Data = new PushButtonData("Unused", "Unused", thisAssemblyPath, "SubcategoriesMerger.Purge");
-            PushButton pb2 = ribbonPanel.AddItem(b2Data) as PushButton;
-            pb2.ToolTip = "Unused Subcategories in the Project.";
-            BitmapImage pb2Image = new BitmapImage(new Uri("pack://application:,,,/SubcategoriesMerger;component/Resources/SubcategoriesManager.png"));
-            pb2.LargeImage = pb2Image;
+            //PushButtonData b2Data = new PushButtonData("Unused", "Unused", thisAssemblyPath, "SubcategoriesMerger.Purge");
+            //PushButton pb2 = ribbonPanel.AddItem(b2Data) as PushButton;
+            //pb2.ToolTip = "Unused Subcategories in the Project.";
+            //BitmapImage pb2Image = new BitmapImage(new Uri("pack://application:,,,/SubcategoriesMerger;component/Resources/SubcategoriesManager.png"));
+            //pb2.LargeImage = pb2Image;
         }
 
         public Result OnShutdown(UIControlledApplication application)
