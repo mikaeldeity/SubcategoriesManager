@@ -5,7 +5,7 @@
     <Assembly>.\SubcategoriesMerger.dll</Assembly>
     <AddInId>bf86b382-e186-4e3d-86c2-12d679a80133</AddInId>
     <FullClassName>SubcategoriesMerger.App</FullClassName>
-    <VendorId>Subcategories Merger</VendorId>
-    <VendorDescription>Subcategories Merger</VendorDescription>
+    <VendorId>Mikael Santrolli</VendorId>
+    <VendorDescription>mikael.santrolli@gmail.com</VendorDescription>
   </AddIn>
 </RevitAddIns>

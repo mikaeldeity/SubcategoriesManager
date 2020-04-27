@@ -80,7 +80,7 @@ namespace SubcategoriesMerger.Dialogs
 
         private void CategoriesDialog_HelpButtonClicked(object sender, CancelEventArgs e)
         {
-            MessageBox.Show("Subcategories Manager", "Developed by Mikael Santrolli\n\nmikael.santrolli@gmail.com");
+            MessageBox.Show("Developed by Mikael Santrolli\n\nmikael.santrolli@gmail.com", "Subcategories Manager" );
         }
     }
 }
